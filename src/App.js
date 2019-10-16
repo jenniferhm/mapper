@@ -61,10 +61,6 @@ export class MapContainer extends Component {
         }}
         onClick={this.onMapClick}
         >
-        {/* <Marker
-          onClick={this.onMarkerClick}
-          name={'Kenyatta International Convention Centre'}
-        /> */}
         {renderMarkers}
         <InfoWindow
           marker={this.state.activeMarker}
@@ -83,9 +79,3 @@ export class MapContainer extends Component {
 export default GoogleApiWrapper({
   apiKey: API_KEY
 })(MapContainer);
-
-// export default GoogleApiWrapper(
-//   (props) => ({
-//     apiKey: props.apiKey
-//   }
-// ))(MapContainer)
