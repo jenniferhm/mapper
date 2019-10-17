@@ -16,28 +16,58 @@ export class MapContainer extends PureComponent {
     this.state = {
       showingInfoWindow: false,  //Hides or the shows the infoWindow
       activeMarker: {},          //Shows the active marker upon click
-      selectedPlace: {},          //Shows the infoWindow to the selected place upon a marker
-      markers: []
+      selectedPlace: {},        //Shows the infoWindow to the selected place upon a marker
+      listings: {},             //Listings as nested objects of a addresses/whole listings
+      markers: []               //Markers -> made from Set for non-duplicate listings
     };
     this.onMarkerClick = this.onMarkerClick.bind(this)
     this.onClose = this.onClose.bind(this)
-
   }
 
   componentDidMount() {
-    let renderMarkers = locationsData.map(marker => {
-      let listingLatLng = {lat: marker.latitude, lng: marker.longitude}
-      return <Marker key={uuid()} className={'marker'} name={`$${marker.price}, ${marker.size}`} onMouseover={this.onMarkerClick} onMouseout={this.onClose} position={listingLatLng}/> 
+    let listingsLatLng = new Set()
+    for (let listing of locationsData) {
+      if (!listingsLatLng.has(listing.address_1)) {
+        listingsLatLng.add(listing)
+      }
     }
-    );
+
+    let markersArray = []
+    let listingsObj = {}
+
+    listingsLatLng.forEach(marker => {
+    let latLong = {lat: marker.latitude, lng: marker.longitude}
+
+    // Create Marker for Map
+    markersArray.push(<Marker key={uuid()} 
+      className={'marker'} 
+      name={`$${marker.price}, ${marker.size}`} 
+      onMouseover={this.onMarkerClick} 
+      onMouseout={this.onClose} 
+      position={latLong}/> 
+      )
+      
+    // Create listing for info
+    if (marker.address_1 in listingsObj) {
+      listingsObj[marker.address_1]= {...listingsObj[marker.address_1], [marker.id]: marker}
+    }
+    else {
+      listingsObj[marker.address_1] = {[marker.id] : marker}
+    }
+      return
+    });
+
+
+
     this.setState(st => ({
-      ...st, markers: renderMarkers
+      ...st, 
+      listings: listingsObj,
+      markers: markersArray
     })
     )
   }
 
   onMarkerClick(props, marker, e) {
-    console.log("MARKER", marker)
     return this.setState({
       selectedPlace: props,
       activeMarker: marker,
@@ -57,7 +87,7 @@ export class MapContainer extends PureComponent {
   };
 
   render() {
-    console.log("MARKERS", this.state.markers)
+    console.log("LISTINGS ====", this.state.listings, "MARKERS ------", this.state.markers)
     return (
       <Map
         id={'map'}
