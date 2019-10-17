@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Map, GoogleApiWrapper, InfoWindow, Marker, google} from 'google-maps-react';
 import uuid from "uuid/v4"
+const locationsData = require('./sampleListingsData');
 
 const mapStyles = {
   width: '100%',
@@ -9,7 +10,7 @@ const mapStyles = {
 
 const API_KEY = process.env.REACT_APP_API_KEY;
 
-export class MapContainer extends Component {
+export class MapContainer extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -18,41 +19,48 @@ export class MapContainer extends Component {
       selectedPlace: {},          //Shows the infoWindow to the selected place upon a marker
       markers: []
     };
+    this.onMarkerClick = this.onMarkerClick.bind(this)
+    this.onClose = this.onClose.bind(this)
+
   }
 
-  onMapClick = (props, location, e) => {
-    let newMarker = <Marker key={uuid()} onClick={this.onMarkerClick} position={e.latLng}/>
-    console.log("coordinates", `${newMarker.props.position.lat()}, ${newMarker.props.position.lng()}`)
-      this.setState({
-        showingInfoWindow: false,
-        activeMarker: null,
-        markers: [...this.state.markers, newMarker]
-      })
+  componentDidMount() {
+    let renderMarkers = locationsData.map(marker => {
+      let listingLatLng = {lat: marker.latitude, lng: marker.longitude}
+      return <Marker key={uuid()} className={'marker'} name={`$${marker.price}, ${marker.size}`} onMouseover={this.onMarkerClick} onMouseout={this.onClose} position={listingLatLng}/> 
     }
+    );
+    this.setState(st => ({
+      ...st, markers: renderMarkers
+    })
+    )
+  }
 
-    onMarkerClick = (props, marker, e) => {
+  onMarkerClick(props, marker, e) {
+    console.log("MARKER", marker)
     return this.setState({
       selectedPlace: props,
       activeMarker: marker,
-      showingInfoWindow: true
+      showingInfoWindow: true,
+      markers: this.state.markers
     })
   };
 
-  onClose = props => {
+  onClose(props){
     if (this.state.showingInfoWindow) {
       this.setState({
         showingInfoWindow: false,
-        activeMarker: null
+        activeMarker: null,
+        markers: this.state.markers
       });
     }
   };
 
   render() {
-    let renderMarkers = this.state.markers.map(marker => (
-      marker
-    ));
+    console.log("MARKERS", this.state.markers)
     return (
       <Map
+        id={'map'}
         google={this.props.google}
         zoom={14}
         style={mapStyles}
@@ -62,7 +70,7 @@ export class MapContainer extends Component {
         }}
         onClick={this.onMapClick}
         >
-        {renderMarkers}
+        {this.state.markers}
         <InfoWindow
           marker={this.state.activeMarker}
           visible={this.state.showingInfoWindow}
