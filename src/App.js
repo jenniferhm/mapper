@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Map, GoogleApiWrapper, InfoWindow, Marker, google} from 'google-maps-react';
+import { Map, GoogleApiWrapper, InfoWindow, Marker} from 'google-maps-react';
 import uuid from "uuid/v4"
 const locationsData = require('./sampleListingsData');
 
@@ -18,7 +18,7 @@ export class MapContainer extends PureComponent {
       activeMarker: {},          //Shows the active marker upon click
       selectedPlace: {},        //Shows the infoWindow to the selected place upon a marker
       listings: {},             //Listings as nested objects of a addresses/whole listings
-      markers: []               //Markers -> made from Set for non-duplicate listings
+      markers: new Set()               //Markers -> made from Set for non-duplicate listings
     };
     this.onMarkerClick = this.onMarkerClick.bind(this)
     this.onClose = this.onClose.bind(this)
@@ -28,33 +28,26 @@ export class MapContainer extends PureComponent {
     let listingsLatLng = new Set()
     for (let listing of locationsData) {
       if (!listingsLatLng.has(listing.address_1)) {
-        listingsLatLng.add(listing)
+        listingsLatLng.add(<Marker key={uuid()} 
+        className={'listing'} 
+        name={`$${listing.price}, ${listing.size}`} 
+        onMouseover={this.onMarkerClick} 
+        onMouseout={this.onClose} 
+        position={{lat: listing.latitude, lng: listing.longitude}}/> )
       }
     }
 
-    let markersArray = []
     let listingsObj = {}
 
-    listingsLatLng.forEach(marker => {
-    let latLong = {lat: marker.latitude, lng: marker.longitude}
-
-    // Create Marker for Map
-    markersArray.push(<Marker key={uuid()} 
-      className={'marker'} 
-      name={`$${marker.price}, ${marker.size}`} 
-      onMouseover={this.onMarkerClick} 
-      onMouseout={this.onClose} 
-      position={latLong}/> 
-      )
-      
+    locationsData.map(marker => {
     // Create listing for info
     if (marker.address_1 in listingsObj) {
-      listingsObj[marker.address_1]= {...listingsObj[marker.address_1], [marker.id]: marker}
+      return listingsObj[marker.address_1]= {...listingsObj[marker.address_1], [marker.id]: marker}
     }
     else {
-      listingsObj[marker.address_1] = {[marker.id] : marker}
+      return listingsObj[marker.address_1] = {[marker.id] : marker}
     }
-      return
+    
     });
 
 
@@ -62,7 +55,7 @@ export class MapContainer extends PureComponent {
     this.setState(st => ({
       ...st, 
       listings: listingsObj,
-      markers: markersArray
+      markers: listingsLatLng
     })
     )
   }
