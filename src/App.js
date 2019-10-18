@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Map, GoogleApiWrapper, InfoWindow, Marker} from 'google-maps-react';
+import { Map, GoogleApiWrapper, InfoWindow, Marker } from 'google-maps-react';
 import uuid from "uuid/v4"
 const locationsData = require('./sampleListingsData');
 
@@ -20,47 +20,41 @@ export class MapContainer extends PureComponent {
       listings: {},             //Listings as nested objects of a addresses/whole listings
       markers: new Set()               //Markers -> made from Set for non-duplicate listings
     };
-    this.onMarkerClick = this.onMarkerClick.bind(this)
-    this.onClose = this.onClose.bind(this)
+    this.onMouseOver = this.onMouseOver.bind(this)
+    this.onMouseOut = this.onMouseOut.bind(this)
   }
 
   componentDidMount() {
     let listingsLatLng = new Set()
     for (let listing of locationsData) {
       if (!listingsLatLng.has(listing.address_1)) {
-        listingsLatLng.add(<Marker key={uuid()} 
-        className={'listing'} 
-        name={`$${listing.price}, ${listing.size}`} 
-        onMouseover={this.onMarkerClick} 
-        onMouseout={this.onClose} 
-        position={{lat: listing.latitude, lng: listing.longitude}}/> )
+        listingsLatLng.add(<Marker key={uuid()}
+          className={'listing'}
+          name={`$${listing.price}, ${listing.size}`}
+          onMouseover={this.onMouseOver}
+          onMouseout={this.onMouseOut}
+          position={{ lat: listing.latitude, lng: listing.longitude }} />)
       }
     }
 
     let listingsObj = {}
 
     locationsData.map(marker => {
-    // Create listing for info
-    if (marker.address_1 in listingsObj) {
-      return listingsObj[marker.address_1]= {...listingsObj[marker.address_1], [marker.id]: marker}
-    }
-    else {
-      return listingsObj[marker.address_1] = {[marker.id] : marker}
-    }
-    
+      // Create listing for info
+      return listingsObj[marker.address_1] = marker.address_1 in listingsObj 
+      ? { ...listingsObj[marker.address_1], [marker.id]: marker } 
+      : { [marker.id]: marker }
     });
 
-
-
     this.setState(st => ({
-      ...st, 
+      ...st,
       listings: listingsObj,
       markers: listingsLatLng
     })
     )
   }
 
-  onMarkerClick(props, marker, e) {
+  onMouseOver(props, marker, e) {
     return this.setState({
       selectedPlace: props,
       activeMarker: marker,
@@ -69,7 +63,7 @@ export class MapContainer extends PureComponent {
     })
   };
 
-  onClose(props){
+  onMouseOut(props) {
     if (this.state.showingInfoWindow) {
       this.setState({
         showingInfoWindow: false,
@@ -80,7 +74,6 @@ export class MapContainer extends PureComponent {
   };
 
   render() {
-    console.log("LISTINGS ====", this.state.listings, "MARKERS ------", this.state.markers)
     return (
       <Map
         id={'map'}
@@ -91,13 +84,12 @@ export class MapContainer extends PureComponent {
           lat: 37.7606574,
           lng: -122.4619144
         }}
-        onClick={this.onMapClick}
-        >
+      >
         {this.state.markers}
         <InfoWindow
           marker={this.state.activeMarker}
           visible={this.state.showingInfoWindow}
-          onClose={this.onClose}
+          onMouseOut={this.onMouseOut}
         >
           <div>
             <h4>{this.state.selectedPlace.name}</h4>
