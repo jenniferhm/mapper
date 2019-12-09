@@ -9,12 +9,12 @@
 - [ ] zooming out, shows grouped neighborhood categories
 
 #### Map (right)
-- [ ] search bar
-- [ ] filters: # of rooms, # of beds, move-in-date (default 2 weeks), more filters: price range per room OR total, lease-type, extra stuff
-- [ ] map overlays: show points of interest, show transit map, show popularity heat map, draw and delete rectangle
-- [ ] polygon outline on hover (neighborhood/listing is highlighted too)
-- [ ] markers for listings: grouped by # of listings; only shows individual when zoomed into neighborhood
-- [ ] on hover prices for each individual listing marker
+- [ ] add search bar
+- [ ] add search filters: # of rooms, # of beds, move-in-date (default 2 weeks), more filters: price range per room OR total, lease-type, extra stuff
+- [ ] add map overlays: show points of interest, show transit map, show popularity heat map, draw and delete rectangle
+- [ ] add polygon outline on hover (neighborhood/listing is highlighted too)
+- [ ] add markers for listings: grouped by # of listings; only shows individual when zoomed into neighborhood
+- [ ] show on hover prices for each individual listing marker
 - [ ] clicking on individual marker shows listing details modal
 
 #### Modal
